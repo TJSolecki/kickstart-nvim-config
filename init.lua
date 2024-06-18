@@ -190,6 +190,59 @@ require('lazy').setup({
   --  This is equivalent to:
   --    require('Comment').setup({})
 
+  {
+    'm4xshen/autoclose.nvim',
+    config = function()
+      local config = {
+        keys = {
+          ['('] = { escape = false, close = true, pair = '()' },
+          ['['] = { escape = false, close = true, pair = '[]' },
+          ['{'] = { escape = false, close = true, pair = '{}' },
+
+          ['>'] = { escape = true, close = false, pair = '<>' },
+          [')'] = { escape = true, close = false, pair = '()' },
+          [']'] = { escape = true, close = false, pair = '[]' },
+          ['}'] = { escape = true, close = false, pair = '{}' },
+
+          ['"'] = { escape = true, close = true, pair = '""' },
+          ["'"] = { escape = true, close = true, pair = "''" },
+          ['`'] = { escape = true, close = true, pair = '``' },
+        },
+        options = {
+          disabled_filetypes = { 'text' },
+          disable_when_touch = true,
+          touch_regex = '[%w(%[{]',
+          pair_spaces = true,
+          auto_indent = true,
+        },
+      }
+      require('autoclose').setup(config)
+    end,
+  },
+  {
+    'windwp/nvim-ts-autotag',
+    config = function()
+      require('nvim-ts-autotag').setup {
+        opts = {
+          -- Defaults
+          enable_close = true, -- Auto close tags
+          enable_rename = true, -- Auto rename pairs of tags
+          enable_close_on_slash = false, -- Auto close on trailing </
+        },
+        -- Also override individual filetype configs, these take priority.
+        -- Empty by default, useful if one of the "opts" global settings
+        -- doesn't work well in a specific filetype
+        per_filetype = {
+          ['html'] = {
+            enable_close = true,
+          },
+          ['svelte'] = {
+            enable_close = true,
+          },
+        },
+      }
+    end,
+  },
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   { 'numToStr/Comment.nvim', opts = {} }, -- "gc" to comment visual regions/lines
 
@@ -225,28 +278,28 @@ require('lazy').setup({
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  { -- Useful plugin to show you pending keybinds.
-    'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
-
-      -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-        ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-        ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-      }
-      -- visual mode
-      require('which-key').register({
-        ['<leader>h'] = { 'Git [H]unk' },
-      }, { mode = 'v' })
-    end,
-  },
+  -- { -- Useful plugin to show you pending keybinds.
+  --   'folke/which-key.nvim',
+  --   event = 'VimEnter', -- Sets the loading event to 'VimEnter'
+  --   config = function() -- This is the function that runs, AFTER loading
+  --     require('which-key').setup()
+  --
+  --     -- Document existing key chains
+  --     require('which-key').register {
+  --       ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+  --       ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+  --       ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
+  --       ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
+  --       ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+  --       ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
+  --       ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+  --     }
+  --     -- visual mode
+  --     require('which-key').register({
+  --       ['<leader>h'] = { 'Git [H]unk' },
+  --     }, { mode = 'v' })
+  --   end,
+  -- },
 
   -- NOTE: Plugins can specify dependencies.
   --
@@ -449,7 +502,7 @@ require('lazy').setup({
 
           -- Execute a code action, usually your cursor needs to be on top of an error
           -- or a suggestion from your LSP for this to activate.
-          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+          map('<leader>va', vim.lsp.buf.code_action, '[V]iew Code [A]ction')
 
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap.
@@ -624,9 +677,13 @@ require('lazy').setup({
         lua = { 'stylua' },
         sql = { 'sqlfmt' },
         rust = { 'rustfmt' },
-        javascript = { 'prettier' },
-        typescript = { 'prettier' },
-        svelte = { 'prettier' },
+        javascript = { 'prettierd' },
+        json = { 'prettierd' },
+        markdown = { 'prettierd' },
+        typescript = { 'prettierd' },
+        svelte = { 'prettierd' },
+        html = { 'prettierd' },
+        css = { 'prettierd' },
         java = { 'google-java-format' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
@@ -752,79 +809,43 @@ require('lazy').setup({
       }
     end,
   },
-
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'rose-pine/neovim',
-    name = 'rose-pine',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
+  {
+    'folke/tokyonight.nvim',
+    lazy = false,
+    priority = 1000,
+    opts = {},
     config = function()
-      require('rose-pine').setup {
-        --- @usage 'auto'|'main'|'moon'|'dawn'
-        variant = 'main',
-        --- @usage 'main'|'moon'|'dawn'
-        dark_variant = 'main',
-        bold_vert_split = false,
-        dim_nc_background = false,
-        disable_background = true,
-        disable_float_background = true,
-        disable_italics = false,
-
-        --- @usage string hex value or named color from rosepinetheme.com/palette
-        groups = {
-          background = 'none',
-          background_nc = '_experimental_nc',
-          panel = 'surface',
-          panel_nc = 'base',
-          border = 'highlight_med',
-          comment = 'muted',
-          link = 'iris',
-          punctuation = 'subtle',
-
-          error = 'love',
-          hint = 'iris',
-          info = 'foam',
-          warn = 'gold',
-
-          headings = {
-            h1 = 'iris',
-            h2 = 'foam',
-            h3 = 'rose',
-            h4 = 'gold',
-            h5 = 'pine',
-            h6 = 'foam',
-          },
-          -- or set all headings at once
-          -- headings = 'subtle'
+      require('tokyonight').setup {
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        style = 'night', -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
+        light_style = 'day', -- The theme is used when the background is set to light
+        transparent = false, -- Enable this to disable setting the background color
+        terminal_colors = true, -- Configure the colors used when opening a `:terminal` in [Neovim](https://github.com/neovim/neovim)
+        styles = {
+          -- Style to be applied to different syntax groups
+          -- Value is any valid attr-list value for `:help nvim_set_hl`
+          comments = { italic = true },
+          keywords = { italic = true },
+          functions = {},
+          variables = {},
+          -- Background styles. Can be "dark", "transparent" or "normal"
+          sidebars = 'dark', -- style for sidebars, see below
+          floats = 'transparent', -- style for floating windows
         },
-
-        -- Change specific vim highlight groups
-        -- https://github.com/rose-pine/neovim/wiki/Recipes
-        highlight_groups = {
-          ColorColumn = { bg = 'rose' },
-
-          -- Blend colours against the "base" background
-          CursorLine = { bg = 'rose', blend = 10 },
-          StatusLine = { fg = 'rose', bg = 'rose', blend = 10 },
-
-          -- By default each group adds to the existing config.
-          -- If you only want to set what is written in this config exactly,
-          -- you can set the inherit option:
-          Search = { bg = 'gold', inherit = false },
-        },
+        sidebars = { 'qf', 'help' }, -- Set a darker background on sidebar-like windows. For example: `["qf", "vista_kind", "terminal", "packer"]`
+        day_brightness = 0.3, -- Adjusts the brightness of the colors of the **Day** style. Number between 0 and 1, from dull to vibrant colors
+        hide_inactive_statusline = false, -- Enabling this option, will hide inactive statuslines and replace them with a thin border instead. Should work with the standard **StatusLine** and **LuaLine**.
+        dim_inactive = false, -- dims inactive windows
+        lualine_bold = false, -- When `true`, section headers in the lualine theme will be bold
       }
     end,
     init = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'rose-pine'
-
-      -- You can configure highlights by doing something like:
-      -- vim.cmd.hi 'Comment gui=none'
+      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.let "g:lightline = {'colorscheme': 'tokyonight'}"
     end,
   },
 
@@ -841,13 +862,6 @@ require('lazy').setup({
       --  - yinq - [Y]ank [I]nside [N]ext [']quote
       --  - ci'  - [C]hange [I]nside [']quote
       require('mini.ai').setup { n_lines = 500 }
-
-      -- Add/delete/replace surroundings (brackets, quotes, etc.)
-      --
-      -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-      -- - sd'   - [S]urround [D]elete [']quotes
-      -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
@@ -872,22 +886,6 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = {
-        'bash',
-        'c',
-        'diff',
-        'html',
-        'lua',
-        'luadoc',
-        'markdown',
-        'vim',
-        'vimdoc',
-        'css',
-        'scss',
-        'javascript',
-        'typescript',
-        'svelte',
-      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
