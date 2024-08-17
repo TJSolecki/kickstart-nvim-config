@@ -56,6 +56,7 @@ vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
+vim.opt.autoindent = true
 
 vim.opt.smartindent = true
 vim.opt.wrap = false
@@ -91,6 +92,7 @@ vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.s
 vim.diagnostic.config {
   float = { border = _border },
 }
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -599,7 +601,23 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
-        --
+        eslint = {
+          capabilities = capabilities,
+          flags = { debounce_text_changes = 500 },
+          on_attach = function(client)
+            client.server_capabilities.documentFormattingProvider = true
+            if client.server_capabilities.documentFormattingProvider then
+              local au_lsp = vim.api.nvim_create_augroup('eslint_lsp', { clear = true })
+              vim.api.nvim_create_autocmd('BufWritePre', {
+                pattern = '*',
+                callback = function()
+                  vim.lsp.buf.format { async = true }
+                end,
+                group = au_lsp,
+              })
+            end
+          end,
+        },
 
         lua_ls = {
           -- cmd = {...},
@@ -667,7 +685,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { c = false, cpp = false }
         return {
           timeout_ms = 500,
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
@@ -810,42 +828,74 @@ require('lazy').setup({
     end,
   },
   {
-    'folke/tokyonight.nvim',
-    lazy = false,
-    priority = 1000,
-    opts = {},
+    'rose-pine/neovim',
+    name = 'rose-pine',
+    priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
-      require('tokyonight').setup {
-        -- your configuration comes here
-        -- or leave it empty to use the default settings
-        style = 'night', -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
-        light_style = 'day', -- The theme is used when the background is set to light
-        transparent = false, -- Enable this to disable setting the background color
-        terminal_colors = true, -- Configure the colors used when opening a `:terminal` in [Neovim](https://github.com/neovim/neovim)
-        styles = {
-          -- Style to be applied to different syntax groups
-          -- Value is any valid attr-list value for `:help nvim_set_hl`
-          comments = { italic = true },
-          keywords = { italic = true },
-          functions = {},
-          variables = {},
-          -- Background styles. Can be "dark", "transparent" or "normal"
-          sidebars = 'dark', -- style for sidebars, see below
-          floats = 'transparent', -- style for floating windows
+      require('rose-pine').setup {
+        --- @usage 'auto'|'main'|'moon'|'dawn'
+        variant = 'main',
+        --- @usage 'main'|'moon'|'dawn'
+        dark_variant = 'main',
+        bold_vert_split = false,
+        dim_nc_background = false,
+        disable_background = true,
+        disable_float_background = true,
+        disable_italics = false,
+
+        --- @usage string hex value or named color from rosepinetheme.com/palette
+        groups = {
+          background = 'none',
+          background_nc = '_experimental_nc',
+          panel = 'surface',
+          panel_nc = 'base',
+          border = 'highlight_med',
+          comment = 'muted',
+          link = 'iris',
+          punctuation = 'subtle',
+
+          error = 'love',
+          hint = 'iris',
+          info = 'foam',
+          warn = 'gold',
+
+          headings = {
+            h1 = 'iris',
+            h2 = 'foam',
+            h3 = 'rose',
+            h4 = 'gold',
+            h5 = 'pine',
+            h6 = 'foam',
+          },
+          -- or set all headings at once
+          -- headings = 'subtle'
         },
-        sidebars = { 'qf', 'help' }, -- Set a darker background on sidebar-like windows. For example: `["qf", "vista_kind", "terminal", "packer"]`
-        day_brightness = 0.3, -- Adjusts the brightness of the colors of the **Day** style. Number between 0 and 1, from dull to vibrant colors
-        hide_inactive_statusline = false, -- Enabling this option, will hide inactive statuslines and replace them with a thin border instead. Should work with the standard **StatusLine** and **LuaLine**.
-        dim_inactive = false, -- dims inactive windows
-        lualine_bold = false, -- When `true`, section headers in the lualine theme will be bold
+
+        -- Change specific vim highlight groups
+        -- https://github.com/rose-pine/neovim/wiki/Recipes
+        highlight_groups = {
+          ColorColumn = { bg = 'rose' },
+
+          -- Blend colours against the "base" background
+          CursorLine = { bg = 'rose', blend = 10 },
+          StatusLine = { fg = 'rose', bg = 'rose', blend = 10 },
+
+          -- By default each group adds to the existing config.
+          -- If you only want to set what is written in this config exactly,
+          -- you can set the inherit option:
+          Search = { bg = 'gold', inherit = false },
+        },
       }
     end,
     init = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-      vim.cmd.let "g:lightline = {'colorscheme': 'tokyonight'}"
+      vim.cmd.colorscheme 'rose-pine'
+
+      -- You can configure highlights by doing something like:
+      vim.cmd.hi 'Comment gui=none'
+      -- vim.cmd.hi 'Comment gui=none'
     end,
   },
 
