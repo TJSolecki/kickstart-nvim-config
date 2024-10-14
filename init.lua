@@ -107,7 +107,7 @@ vim.keymap.set('n', '<leader>vd', vim.diagnostic.open_float, { desc = '[V]iew [D
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Primeagen remaps
-vim.keymap.set('n', '<leader>pv', vim.cmd.Ex)
+vim.keymap.set('n', '<leader>pv', vim.cmd.Oil)
 
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
@@ -220,6 +220,19 @@ require('lazy').setup({
       }
       require('autoclose').setup(config)
     end,
+  },
+  {
+    'stevearc/oil.nvim',
+    ---@module 'oil'
+    ---@type oil.SetupOpts
+    opts = {
+      view_options = {
+        show_hidden = true,
+      },
+    },
+    -- Optional dependencies
+    dependencies = { { 'echasnovski/mini.icons', opts = {} } },
+    -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
   },
   {
     'windwp/nvim-ts-autotag',
@@ -506,6 +519,9 @@ require('lazy').setup({
           -- or a suggestion from your LSP for this to activate.
           map('<leader>va', vim.lsp.buf.code_action, '[V]iew Code [A]ction')
 
+          -- View references of function or variable
+          map('<leader>vrr', vim.lsp.buf.references, '[V]iew [R]efe[R]ences')
+
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap.
           map('K', vim.lsp.buf.hover, 'Hover Documentation')
@@ -635,6 +651,9 @@ require('lazy').setup({
         },
       }
 
+      require('lspconfig').elixirls.setup {}
+      require('lspconfig').tailwindcss.setup {}
+      require('lspconfig').gleam.setup {}
       -- Ensure the servers and tools above are installed
       --  To check the current status of installed tools and/or manually install
       --  other tools, you can run
@@ -828,6 +847,28 @@ require('lazy').setup({
     end,
   },
   {
+    'rebelot/kanagawa.nvim',
+    opts = { transparent = true },
+    init = function()
+      -- vim.cmd 'colorscheme kanagawa'
+    end,
+  },
+  {
+    'Rigellute/shades-of-purple.vim',
+    init = function()
+      -- vim.cmd 'colorscheme shades_of_purple'
+    end,
+  },
+  {
+    'UtkarshVerma/molokai.nvim',
+    init = function()
+      vim.cmd 'colorscheme molokai'
+    end,
+    opts = {
+      transparent = true,
+    },
+  },
+  {
     'rose-pine/neovim',
     name = 'rose-pine',
     priority = 1000, -- Make sure to load this before all the other start plugins.
@@ -891,7 +932,8 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'rose-pine'
+
+      -- vim.cmd.colorscheme 'rose-pine'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
