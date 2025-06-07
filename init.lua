@@ -427,7 +427,17 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
-
+  { 'sindrets/diffview.nvim' },
+  {
+    'S1M0N38/love2d.nvim',
+    cmd = 'LoveRun',
+    opts = {},
+    keys = {
+      { '<leader>v', ft = 'lua', desc = 'LÖVE' },
+      { '<leader>vv', '<cmd>LoveRun<cr>', ft = 'lua', desc = 'Run LÖVE' },
+      { '<leader>vs', '<cmd>LoveStop<cr>', ft = 'lua', desc = 'Stop LÖVE' },
+    },
+  },
   { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -513,11 +523,11 @@ require('lazy').setup({
 
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
-          map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+          map('<leader>rr', vim.lsp.buf.rename, '[R]ename')
 
           -- Execute a code action, usually your cursor needs to be on top of an error
           -- or a suggestion from your LSP for this to activate.
-          map('<leader>va', vim.lsp.buf.code_action, '[V]iew Code [A]ction')
+          map('<leader><CR>', vim.lsp.buf.code_action, '[V]iew Code [A]ction')
 
           -- View references of function or variable
           map('<leader>vrr', vim.lsp.buf.references, '[V]iew [R]efe[R]ences')
@@ -653,6 +663,18 @@ require('lazy').setup({
 
       require('lspconfig').elixirls.setup {}
       require('lspconfig').tailwindcss.setup {}
+      require('lspconfig').html.setup {
+        filetypes = {
+          'html',
+          'templ',
+          'heex',
+        },
+        init_options = {
+          embedded_languages = {
+            elixir = true,
+          },
+        },
+      }
       require('lspconfig').gleam.setup {}
       -- Ensure the servers and tools above are installed
       --  To check the current status of installed tools and/or manually install
@@ -696,6 +718,11 @@ require('lazy').setup({
         end,
         mode = '',
         desc = '[F]ormat buffer',
+      },
+    },
+    formatters = {
+      stylua = {
+        args = { '--config-path', '~/.config/stylua/config.toml' },
       },
     },
     opts = {
@@ -862,10 +889,23 @@ require('lazy').setup({
   {
     'UtkarshVerma/molokai.nvim',
     init = function()
-      vim.cmd 'colorscheme molokai'
+      -- vim.cmd 'colorscheme molokai'
     end,
     opts = {
       transparent = true,
+      --- You can override specific color groups to use other groups or a hex color
+      --- function will be called with a ColorScheme table
+      ---@param colors ColorScheme
+      on_colors = function(colors)
+        colors.border_highlight = colors.magenta
+      end,
+      --- You can override specific highlights to use other groups or a hex color
+      --- function will be called with a Highlights and ColorScheme table
+      ---@param highlights Highlights
+      ---@param colors ColorScheme
+      on_highlights = function(highlights, colors)
+        highlights.ColorColumn.bg = colors.magenta
+      end,
     },
   },
   {
@@ -933,7 +973,7 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
 
-      -- vim.cmd.colorscheme 'rose-pine'
+      vim.cmd.colorscheme 'rose-pine'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
