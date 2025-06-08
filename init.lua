@@ -81,6 +81,8 @@ vim.opt.colorcolumn = '120'
 
 local _border = 'rounded'
 
+vim.api.nvim_set_option_value('winborder', 'rounded', {})
+
 vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
   border = _border,
 })
